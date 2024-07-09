@@ -1,5 +1,6 @@
 let aria2 = { readyState: WebSocket.CLOSED }
 let activeDownloads = 0
+let activeSeeding = 0
 let activeWaiting = 0
 
 const getActiveDownloads = {
@@ -62,14 +63,14 @@ const initializeWebSocket = async () => {
 
   aria2.onmessage = (event) => {
     const response = JSON.parse(event.data)
-    console.log(response)
     if (response.id === "activeDownload") {
-      activeDownloads = response.result.length
+      let activeDownloadTasks = response.result.filter(task => task.seeder === "false" || task.seeder === undefined)
+      let activeSeedingTasks = response.result.filter(task => task.seeder === "true")
+      activeDownloads = activeDownloadTasks.length
+      activeSeeding = activeSeedingTasks.length
       updateBadge()
       chrome.runtime.sendMessage({ type: 'activeDownload', message: JSON.stringify(response.result) })
     } else if (response.id === "activeWaiting") {
-      activeWaiting = response.result.length
-      updateBadge()
       chrome.runtime.sendMessage({ type: 'activeWaiting', message: JSON.stringify(response.result) })
     } else if (response.id === "stopped") {
       chrome.runtime.sendMessage({ type: 'stopped', message: JSON.stringify(response.result) })
@@ -105,7 +106,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'requestCounts') {
     requestCounts()
   } else if (request.type === 'removeTask') {
-    console.log(request.gid)
     aria2.send(JSON.stringify({
       jsonrpc: "2.0",
       method: "aria2.remove",
@@ -120,8 +120,8 @@ const updateBadge = () => {
   if (activeDownloads > 0) {
     chrome.action.setBadgeText({ text: activeDownloads.toString() })
     chrome.action.setBadgeBackgroundColor({ color: [135, 206, 235, 255] }) // 天蓝色
-  } else if (activeWaiting > 0) {
-    chrome.action.setBadgeText({ text: activeWaiting.toString() })
+  } else if (activeSeeding > 0) {
+    chrome.action.setBadgeText({ text: activeSeeding.toString() })
     chrome.action.setBadgeBackgroundColor({ color: [144, 238, 144, 255] }); // 浅绿色
   } else {
     chrome.action.setBadgeText({ text: '' })

@@ -1,42 +1,36 @@
 <template>
   <div class="task-detail-container">
-    <n-card bordered>
+    <n-card bordered content-style="padding: 4px">
       <n-grid x-gap="12" :cols="24">
-        <n-gi :span="22">
-          <n-grid x-gap="12" :cols="24">
-              <n-gi :span="18" class="task-item">
-                <n-text>{{ taskName }}</n-text>
-              </n-gi>
-              <n-gi :span="6" class="task-item">
-                <n-text>{{ totalSize }}</n-text>
-              </n-gi>
-          </n-grid>
-          <n-grid x-gap="12" :cols="24">
-            <n-gi :span="24" class="task-item">
-              <n-progress
-                type="line"
-                :percentage="progress"
-                :indicator-placement="'inside'"
-                processing
-              />
-            </n-gi>
-          </n-grid>
-          <n-grid x-gap="12" :cols="24">
-            <n-gi :span="6" class="task-item">
-              <n-text>{{ elapsedTime }}</n-text>
-            </n-gi>
-            <n-gi :span="12" class="task-item">
-              <n-text>{{ connections }}</n-text>
-            </n-gi>
-            <n-gi :span="6" class="task-item">
-              <n-text>{{ downloadSpeed }}</n-text>
-            </n-gi>
-          </n-grid>
+        <n-gi :span="20" class="task-item">
+          <n-text>{{ taskName }}</n-text>
         </n-gi>
-        <n-gi :span="2">
-          <n-button quaternary round type="error" @click="removeTask">
-            <template #icon><n-icon><Delete /></n-icon></template>
-          </n-button>
+        <n-gi :span="4" class="task-item">
+          <n-flex justify="center">
+            <n-button text class="task-button" type="error" @click="removeTask">
+              <n-icon><Delete /></n-icon>
+            </n-button>
+          </n-flex>
+        </n-gi>
+        <n-gi :span="20" class="task-item">
+          <n-progress
+            type="line"
+            :percentage="progress"
+            :indicator-placement="'inside'"
+            :processing="status === 'default' || status === 'success'"
+            :status="status"
+          />
+        </n-gi>
+        <n-gi :span="4" class="task-item" style="margin-top: -3px">
+          <n-text>{{ totalSize }}</n-text>
+        </n-gi>
+        <n-gi :span="24" class="task-item">
+          <n-flex justify="right">
+            <n-text class="task-info" v-if="status === 'default'">{{ elapsedTime }}</n-text>
+            <n-text class="task-info">{{ connections }}</n-text>
+            <n-text class="task-info" v-if="+task.downloadSpeed">↓ {{ downloadSpeed }}</n-text>
+            <n-text class="task-info" v-if="+task.uploadSpeed">↑ {{ uploadSpeed }}</n-text>
+          </n-flex>
         </n-gi>
       </n-grid>
     </n-card>
@@ -44,8 +38,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { NCard, NGrid, NGi, NText, NButton, NIcon, NSpace, NProgress } from 'naive-ui'
+import { computed } from 'vue'
+import { NCard, NGrid, NGi, NText, NButton, NIcon, NFlex, NSpace, NProgress } from 'naive-ui'
 import { Delete } from '@vicons/carbon'
 
 const props = defineProps({
@@ -66,32 +60,48 @@ const totalSize = computed(() => {
 })
 
 const progress = computed(() => {
-  return ((props.task.completedLength / props.task.totalLength) * 100).toFixed(0)
+  return ((props.task.completedLength / props.task.totalLength) * 100).toFixed(2)
 })
 
-const progressStatus = computed(() => {
-  return 'active'
+const status = computed(() => {
+  switch (props.task.status) {
+    case 'active':
+      switch (props.task.seeder) {
+        case "true":
+          return 'success'
+        case "false":
+        default:
+          return 'default'
+      }
+    case 'paused':
+    case 'waiting':
+      return 'warning'
+    default:
+      return 'error'
+  }
 })
 
 // 根据completedLength, totalLength和downloadSpeed算出剩余时间
 const elapsedTime = computed(() => {
   const remaining = props.task.totalLength - props.task.completedLength
-  const speed = props.task.downloadSpeed
+  const speed = +props.task.downloadSpeed
   if (speed === 0) {
     return '∞'
   }
   const time = remaining / speed
   if (time < 60) {
-    return time.toFixed(2) + 's'
+    return time.toFixed(0) + 's'
   } else if (time < 3600) {
-    return (time / 60).toFixed(2) + 'm'
-  } else {
-    return (time / 3600).toFixed(2) + 'h'
+    return (time / 60).toFixed(0) + 'm'
   }
 })
 
 const downloadSpeed = computed(() => {
   return (props.task.downloadSpeed / 1024).toFixed(2) + ' KB/s'
+})
+
+const uploadSpeed = computed(() => {
+  return (props.task.uploadSpeed / 1024).toFixed(2) + ' KB/s'
 })
 
 const connections = computed(() => {
@@ -102,7 +112,6 @@ const connections = computed(() => {
 })
 
 const removeTask = () => {
-  chrome.runtime.sendMessage({ type: 'removeTask', gid: props.task.gid })
   emit('removeTask', props.task.gid)
 }
 
@@ -111,5 +120,13 @@ const removeTask = () => {
 <style scoped>
 .task-detail-container {
   padding: 4px;
+}
+.task-button {
+  font-size: 22px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+.task-info {
+  padding-right: 8px;
 }
 </style>

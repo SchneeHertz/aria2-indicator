@@ -1,10 +1,10 @@
 <script setup>
 import Task from './components/Task.vue'
-
+import { NEmpty } from 'naive-ui'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const displayTask = ref([])
-const updator = null
+let updator = null
 onMounted(() => {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'activeDownload' || request.type === 'activeWaiting') {
@@ -26,7 +26,6 @@ onMounted(() => {
         }
       })
     }
-    console.log(displayTask.value)
   })
   chrome.runtime.sendMessage({ type: 'requestCounts' })
   updator = setInterval(() => chrome.runtime.sendMessage({ type: 'requestCounts' }), 1000)
@@ -46,6 +45,7 @@ const handleTaskRemove = (gid) => {
 </script>
 
 <template>
+  <n-empty v-if="displayTask.length === 0" description="No task" style="margin: 10px"/>
   <Task v-for="task in displayTask" :key="task.gid" :task="task" @remove-task="handleTaskRemove"/>
 </template>
 
