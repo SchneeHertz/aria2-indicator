@@ -34,10 +34,8 @@
           </n-grid>
         </n-gi>
         <n-gi :span="2">
-          <n-button text style="font-size: 12px" @click="removeTask">
-            <n-icon>
-              <Delete />
-            </n-icon>
+          <n-button quaternary round type="error" @click="removeTask">
+            <template #icon><n-icon><Delete /></n-icon></template>
           </n-button>
         </n-gi>
       </n-grid>
@@ -47,7 +45,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { NCard, NGrid, NGi, NText, NButton, NSpace, NProgress } from 'naive-ui'
+import { NCard, NGrid, NGi, NText, NButton, NIcon, NSpace, NProgress } from 'naive-ui'
 import { Delete } from '@vicons/carbon'
 
 const props = defineProps({
@@ -113,29 +111,5 @@ const removeTask = () => {
 <style scoped>
 .task-detail-container {
   padding: 4px;
-}
-
-.task-row {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.task-item {
-  flex: 1;
-  text-align: left;
-  padding: 0 8px;
-}
-
-.task-progress {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.task-progress n-progress {
-  flex: 1;
-  margin-right: 8px;
 }
 </style>
