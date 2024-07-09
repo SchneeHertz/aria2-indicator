@@ -39,7 +39,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { NCard, NGrid, NGi, NText, NButton, NIcon, NFlex, NSpace, NProgress } from 'naive-ui'
+import { NCard, NGrid, NGi, NText, NButton, NIcon, NFlex, NProgress } from 'naive-ui'
 import { Delete } from '@vicons/carbon'
 
 const props = defineProps({
@@ -56,11 +56,11 @@ const taskName = computed(() => {
 })
 
 const totalSize = computed(() => {
-  return (props.task.totalLength / (1024 * 1024)).toFixed(2) + ' MB'
+  return ((+props.task.totalLength) / (1024 * 1024)).toFixed(2) + ' MB'
 })
 
 const progress = computed(() => {
-  return ((props.task.completedLength / props.task.totalLength) * 100).toFixed(2)
+  return (((+props.task.completedLength) / (+props.task.totalLength || 1)) * 100).toFixed(2)
 })
 
 const status = computed(() => {
@@ -83,7 +83,7 @@ const status = computed(() => {
 
 // 根据completedLength, totalLength和downloadSpeed算出剩余时间
 const elapsedTime = computed(() => {
-  const remaining = props.task.totalLength - props.task.completedLength
+  const remaining = (+props.task.totalLength) - (+props.task.completedLength)
   const speed = +props.task.downloadSpeed
   if (speed === 0) {
     return '∞'
@@ -97,11 +97,11 @@ const elapsedTime = computed(() => {
 })
 
 const downloadSpeed = computed(() => {
-  return (props.task.downloadSpeed / 1024).toFixed(2) + ' KB/s'
+  return ((+props.task.downloadSpeed) / 1024).toFixed(2) + ' KB/s'
 })
 
 const uploadSpeed = computed(() => {
-  return (props.task.uploadSpeed / 1024).toFixed(2) + ' KB/s'
+  return ((+props.task.uploadSpeed) / 1024).toFixed(2) + ' KB/s'
 })
 
 const connections = computed(() => {
