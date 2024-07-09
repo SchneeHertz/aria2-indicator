@@ -48,6 +48,3 @@ const handleTaskRemove = (gid) => {
   <n-empty v-if="displayTask.length === 0" description="No task" style="margin: 10px"/>
   <Task v-for="task in displayTask" :key="task.gid" :task="task" @remove-task="handleTaskRemove"/>
 </template>
-
-<style scoped>
-</style>
