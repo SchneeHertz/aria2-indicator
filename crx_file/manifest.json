@@ -13,6 +13,7 @@
   "background": {
     "service_worker": "service-worker.js"
   },
+  "options_page": "options.html",
   "icons": {
     "16": "icon/Ar_16.png",
     "32": "icon/Ar_32.png",
