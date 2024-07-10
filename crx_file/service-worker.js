@@ -3,23 +3,29 @@ let activeDownloads = 0
 let activeSeeding = 0
 let activeWaiting = 0
 
-const getActiveDownloads = {
+const getActiveDownload = {
   jsonrpc: "2.0",
   method: "aria2.tellActive",
   id: "activeDownload"
 }
 
-const getActiveWating = {
+const getActiveDownloadFromPopup = {
+  jsonrpc: "2.0",
+  method: "aria2.tellActive",
+  id: "activeDownloadFromPopup"
+}
+
+const getActiveWaitingFromPopup = {
   jsonrpc: "2.0",
   method: "aria2.tellWaiting",
-  id: "activeWaiting",
+  id: "activeWaitingFromPopup",
   params: [0, 1000]
 }
 
-const getStopped = {
+const getStoppedFromPopup = {
   jsonrpc: "2.0",
   method: "aria2.tellStopped",
-  id: "stopped",
+  id: "stoppedFromPopup",
   params: [0, 1000]
 }
 
@@ -32,15 +38,19 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   }
 })
 
-const requestCounts = () => {
+const requestCounts = (fromPopup) => {
   // 检查WebSocket连接状态
   if (aria2.readyState === WebSocket.CLOSED || aria2.readyState === WebSocket.CLOSING) {
     console.log("WebSocket is not open. connecting...")
     initializeWebSocket()
   } else if (aria2.readyState === WebSocket.OPEN) {
-    aria2.send(JSON.stringify(getActiveDownloads))
-    aria2.send(JSON.stringify(getActiveWating))
-    aria2.send(JSON.stringify(getStopped))
+    if (fromPopup) {
+      aria2.send(JSON.stringify(getActiveDownloadFromPopup))
+      aria2.send(JSON.stringify(getActiveWaitingFromPopup))
+      aria2.send(JSON.stringify(getStoppedFromPopup))
+    } else {
+      aria2.send(JSON.stringify(getActiveDownload))
+    }
   } else {
     console.log("WebSocket is still connecting...")
   }
@@ -63,16 +73,16 @@ const initializeWebSocket = async () => {
 
   aria2.onmessage = (event) => {
     const response = JSON.parse(event.data)
-    if (response.id === "activeDownload") {
+    if (response.id === "activeDownload" || response.id === "activeDownloadFromPopup") {
       let activeDownloadTasks = response.result.filter(task => task.seeder === "false" || task.seeder === undefined)
       let activeSeedingTasks = response.result.filter(task => task.seeder === "true")
       activeDownloads = activeDownloadTasks.length
       activeSeeding = activeSeedingTasks.length
       updateBadge()
-      chrome.runtime.sendMessage({ type: 'activeDownload', message: JSON.stringify(response.result) })
-    } else if (response.id === "activeWaiting") {
+      if (response.id === "activeDownloadFromPopup") chrome.runtime.sendMessage({ type: 'activeDownload', message: JSON.stringify(response.result) })
+    } else if (response.id === "activeWaitingFromPopup") {
       chrome.runtime.sendMessage({ type: 'activeWaiting', message: JSON.stringify(response.result) })
-    } else if (response.id === "stopped") {
+    } else if (response.id === "stoppedFromPopup") {
       chrome.runtime.sendMessage({ type: 'stopped', message: JSON.stringify(response.result) })
     } else {
       requestCounts()
@@ -104,7 +114,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'requestCounts') {
-    requestCounts()
+    requestCounts(true)
   } else if (request.type === 'removeTask') {
     aria2.send(JSON.stringify({
       jsonrpc: "2.0",

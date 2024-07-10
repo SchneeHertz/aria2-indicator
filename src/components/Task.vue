@@ -60,7 +60,7 @@ const totalSize = computed(() => {
 })
 
 const progress = computed(() => {
-  return (((+props.task.completedLength) / (+props.task.totalLength || 1)) * 100).toFixed(2)
+  return Number((((+props.task.completedLength) / (+props.task.totalLength || 1)) * 100).toFixed(2))
 })
 
 const status = computed(() => {
