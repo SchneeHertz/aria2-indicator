@@ -11,7 +11,7 @@ export default defineConfig({
     {
       name: 'hot-build',
       enforce: "pre",
-      async handleHotUpdate() {
+      handleHotUpdate: async () => {
         if (!bundling) {
           bundling = true
           await build({'build': { outDir: './dist'}})

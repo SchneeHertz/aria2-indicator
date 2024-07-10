@@ -5,11 +5,13 @@
 # Aria2 Indicator
 </div>
 
-**A minimalist Aria2 download status indicator (Chrome extension) that only displays and cancels the current task, requires no permissions, and has no other functions.**
+**A minimalist Aria2 download status indicator (Chrome extension) that can only display or cancel the current task, without requiring any permissions, and has no other functions.**
 
 ## Installation
 
-
+<a href="https://chromewebstore.google.com/detail/aria2-indicator/dnpnmiohajiajogiadhghepaholocnlj">
+  <img height="58" src="https://raw.githubusercontent.com/SchneeHertz/aria2-indicator/master/screenshot/chrome_store.png" alt="Chrome Web Store">
+</a>
 
 ## Features
 
