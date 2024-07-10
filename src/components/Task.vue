@@ -14,7 +14,7 @@
             </n-button>
           </n-flex>
         </n-gi>
-        <n-gi :span="20" class="task-item">
+        <n-gi :span="19" class="task-item">
           <n-progress
             type="line"
             :percentage="progress"
@@ -23,7 +23,7 @@
             :status="status"
           />
         </n-gi>
-        <n-gi :span="4" class="task-item" style="margin-top: -3px">
+        <n-gi :span="5" class="task-item" style="margin-top: -3px">
           <n-text>{{ totalSize }}</n-text>
         </n-gi>
         <n-gi :span="24" class="task-item">
