@@ -2,13 +2,18 @@ let aria2 = { readyState: WebSocket.CLOSED }
 let activeDownloads = 0
 let activeSeeding = 0
 
-let token = ""
+let token = null
+let wsUrl = "ws://localhost:6800/jsonrpc"
 ;(async () => {
-  await chrome.storage.local.get("token")
+  await chrome.storage.local.get(["wsUrl", "token"])
   .then((data) => {
+    if (data.wsUrl) {
+      wsUrl = data.wsUrl
+    }
     if (data.token) {
       token = data.token
     }
+    initializeWebSocket()
   })
 })()
 
@@ -33,7 +38,7 @@ const getActiveWaitingFromPopup = () => ({
   params: [`token:${token}`, 0, 1000]
 })
 
-const getStoppedFromPopup =  () => ({
+const getStoppedFromPopup = () => ({
   jsonrpc: "2.0",
   method: "aria2.tellStopped",
   id: "stoppedFromPopup",
@@ -68,14 +73,6 @@ const requestCounts = (fromPopup) => {
 }
 
 const initializeWebSocket = async () => {
-  let wsUrl = "ws://localhost:6800/jsonrpc"
-
-  await chrome.storage.local.get("wsUrl")
-  .then((data) => {
-    if (data.wsUrl) {
-      wsUrl = data.wsUrl
-    }
-  })
 
   aria2 = new WebSocket(wsUrl)
 
@@ -110,17 +107,16 @@ const initializeWebSocket = async () => {
   }
 }
 
-initializeWebSocket()
-
 chrome.storage.onChanged.addListener((changes, namespace) => {
   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
     if (key === "wsUrl" && oldValue !== newValue) {
       console.log("WebSocket URL changed from", oldValue, "to", newValue)
       aria2.close()
+      wsUrl = newValue
       initializeWebSocket()
     } else if (key === "token" && oldValue !== newValue) {
-      token = newValue
       console.log("Token changed from", oldValue, "to", newValue)
+      token = newValue
     }
   }
 })
