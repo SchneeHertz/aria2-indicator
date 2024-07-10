@@ -1,33 +1,44 @@
 let aria2 = { readyState: WebSocket.CLOSED }
 let activeDownloads = 0
 let activeSeeding = 0
-let activeWaiting = 0
 
-const getActiveDownload = {
+let token = ""
+;(async () => {
+  await chrome.storage.local.get("token")
+  .then((data) => {
+    if (data.token) {
+      token = data.token
+    }
+  })
+})()
+
+const getActiveDownload = () => ({
   jsonrpc: "2.0",
   method: "aria2.tellActive",
-  id: "activeDownload"
-}
+  id: "activeDownload",
+  params: [`token:${token}`]
+})
 
-const getActiveDownloadFromPopup = {
+const getActiveDownloadFromPopup = () => ({
   jsonrpc: "2.0",
   method: "aria2.tellActive",
-  id: "activeDownloadFromPopup"
-}
+  id: "activeDownloadFromPopup",
+  params: [`token:${token}`]
+})
 
-const getActiveWaitingFromPopup = {
+const getActiveWaitingFromPopup = () => ({
   jsonrpc: "2.0",
   method: "aria2.tellWaiting",
   id: "activeWaitingFromPopup",
-  params: [0, 1000]
-}
+  params: [`token:${token}`, 0, 1000]
+})
 
-const getStoppedFromPopup = {
+const getStoppedFromPopup =  () => ({
   jsonrpc: "2.0",
   method: "aria2.tellStopped",
   id: "stoppedFromPopup",
-  params: [0, 1000]
-}
+  params: [`token:${token}`, 0, 1000]
+})
 
 // 设置周期性任务
 chrome.alarms.create("updateTaskCounts", { periodInMinutes: 0.25 })
@@ -45,11 +56,11 @@ const requestCounts = (fromPopup) => {
     initializeWebSocket()
   } else if (aria2.readyState === WebSocket.OPEN) {
     if (fromPopup) {
-      aria2.send(JSON.stringify(getActiveDownloadFromPopup))
-      aria2.send(JSON.stringify(getActiveWaitingFromPopup))
-      aria2.send(JSON.stringify(getStoppedFromPopup))
+      aria2.send(JSON.stringify(getActiveDownloadFromPopup()))
+      aria2.send(JSON.stringify(getActiveWaitingFromPopup()))
+      aria2.send(JSON.stringify(getStoppedFromPopup()))
     } else {
-      aria2.send(JSON.stringify(getActiveDownload))
+      aria2.send(JSON.stringify(getActiveDownload()))
     }
   } else {
     console.log("WebSocket is still connecting...")
@@ -65,11 +76,10 @@ const initializeWebSocket = async () => {
       wsUrl = data.wsUrl
     }
   })
+
   aria2 = new WebSocket(wsUrl)
 
-  aria2.onopen = () => {
-    requestCounts()
-  }
+  aria2.onopen = () => requestCounts()
 
   aria2.onmessage = (event) => {
     const response = JSON.parse(event.data)
@@ -108,6 +118,9 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       console.log("WebSocket URL changed from", oldValue, "to", newValue)
       aria2.close()
       initializeWebSocket()
+    } else if (key === "token" && oldValue !== newValue) {
+      token = newValue
+      console.log("Token changed from", oldValue, "to", newValue)
     }
   }
 })
