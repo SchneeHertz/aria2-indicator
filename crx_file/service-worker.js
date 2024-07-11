@@ -129,7 +129,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       jsonrpc: "2.0",
       method: "aria2.remove",
       id: "removeTask",
-      params: [request.gid]
+      params: [`token:${token}`, request.gid]
     }))
   }
   return true // 表示将继续处理响应
