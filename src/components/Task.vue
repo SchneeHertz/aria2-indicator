@@ -92,7 +92,7 @@ const elapsedTime = computed(() => {
   const time = remaining / speed
   if (time < 60) {
     return time.toFixed(0) + 's'
-  } else if (time < 3600) {
+  } else {
     return (time / 60).toFixed(0) + 'm'
   }
 })
