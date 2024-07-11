@@ -10,6 +10,9 @@ onMounted(() => {
     if (request.type === 'activeDownload' || request.type === 'activeWaiting') {
       let tasks = JSON.parse(request.message)
       tasks.forEach(task => {
+        if (removedGid.includes(task.gid)) {
+          return
+        }
         let index = displayTask.value.findIndex(t => t.gid === task.gid)
         if (index === -1) {
           displayTask.value.push(task)
@@ -35,9 +38,12 @@ onBeforeUnmount(() => {
   clearInterval(updator)
 })
 
+const removedGid = []
+
 const handleTaskRemove = (gid) => {
   let task = displayTask.value.findIndex(t => t.gid === gid)
   displayTask.value.splice(task, 1)
+  removedGid.push(gid)
   chrome.runtime.sendMessage({ type: 'removeTask', gid })
 }
 
