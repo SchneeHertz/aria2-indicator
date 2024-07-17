@@ -13,6 +13,10 @@
   <img height="58" src="https://raw.githubusercontent.com/SchneeHertz/aria2-indicator/master/screenshot/chrome_store.png" alt="Chrome Web Store">
 </a>
 
+<a href="https://microsoftedge.microsoft.com/addons/detail/aria2-indicator/ajgmkgldklfomncnmbkhlkaiecldnolk">
+  <img height="58" src="https://raw.githubusercontent.com/SchneeHertz/aria2-indicator/master/screenshot/edge_store.png" alt="Edge Add-ons">
+</a>
+
 ## Features
 
 - Display the number of tasks currently downloading or seeding on the icon
