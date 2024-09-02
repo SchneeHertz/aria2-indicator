@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Aria2 Indicator",
   "description": "An indicator displaying aria2 download tasks.",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "permissions": [
     "storage",
     "alarms",
