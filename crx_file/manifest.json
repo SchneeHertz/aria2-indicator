@@ -5,7 +5,8 @@
   "version": "1.0.1",
   "permissions": [
     "storage",
-    "alarms"
+    "alarms",
+    "contextMenus"
   ],
   "action": {
     "default_popup": "index.html"

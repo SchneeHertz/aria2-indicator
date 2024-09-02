@@ -3,9 +3,9 @@ let activeDownloads = 0
 let activeSeeding = 0
 
 let token = null
-let wsUrl = "ws://localhost:6800/jsonrpc"
+let wsUrl = 'ws://localhost:6800/jsonrpc'
 ;(async () => {
-  await chrome.storage.local.get(["wsUrl", "token"])
+  await chrome.storage.local.get(['wsUrl', 'token'])
   .then((data) => {
     if (data.wsUrl) {
       wsUrl = data.wsUrl
@@ -18,38 +18,38 @@ let wsUrl = "ws://localhost:6800/jsonrpc"
 })()
 
 const getActiveDownload = () => ({
-  jsonrpc: "2.0",
-  method: "aria2.tellActive",
-  id: "activeDownload",
+  jsonrpc: '2.0',
+  method: 'aria2.tellActive',
+  id: 'activeDownload',
   params: [`token:${token}`]
 })
 
 const getActiveDownloadFromPopup = () => ({
-  jsonrpc: "2.0",
-  method: "aria2.tellActive",
-  id: "activeDownloadFromPopup",
+  jsonrpc: '2.0',
+  method: 'aria2.tellActive',
+  id: 'activeDownloadFromPopup',
   params: [`token:${token}`]
 })
 
 const getActiveWaitingFromPopup = () => ({
-  jsonrpc: "2.0",
-  method: "aria2.tellWaiting",
-  id: "activeWaitingFromPopup",
+  jsonrpc: '2.0',
+  method: 'aria2.tellWaiting',
+  id: 'activeWaitingFromPopup',
   params: [`token:${token}`, 0, 1000]
 })
 
 const getStoppedFromPopup = () => ({
-  jsonrpc: "2.0",
-  method: "aria2.tellStopped",
-  id: "stoppedFromPopup",
+  jsonrpc: '2.0',
+  method: 'aria2.tellStopped',
+  id: 'stoppedFromPopup',
   params: [`token:${token}`, 0, 1000]
 })
 
 // 设置周期性任务
-chrome.alarms.create("updateTaskCounts", { periodInMinutes: 0.25 })
+chrome.alarms.create('updateTaskCounts', { periodInMinutes: 0.25 })
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "updateTaskCounts") {
+  if (alarm.name === 'updateTaskCounts') {
     requestCounts()
   }
 })
@@ -57,7 +57,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 const requestCounts = (fromPopup) => {
   // 检查WebSocket连接状态
   if (aria2.readyState === WebSocket.CLOSED || aria2.readyState === WebSocket.CLOSING) {
-    console.log("WebSocket is not open. connecting...")
+    console.log('WebSocket is not open. connecting...')
     initializeWebSocket()
   } else if (aria2.readyState === WebSocket.OPEN) {
     if (fromPopup) {
@@ -68,7 +68,7 @@ const requestCounts = (fromPopup) => {
       aria2.send(JSON.stringify(getActiveDownload()))
     }
   } else {
-    console.log("WebSocket is still connecting...")
+    console.log('WebSocket is still connecting...')
   }
 }
 
@@ -80,16 +80,16 @@ const initializeWebSocket = async () => {
 
   aria2.onmessage = (event) => {
     const response = JSON.parse(event.data)
-    if (response.id === "activeDownload" || response.id === "activeDownloadFromPopup") {
-      let activeDownloadTasks = response.result.filter(task => task.seeder === "false" || task.seeder === undefined)
-      let activeSeedingTasks = response.result.filter(task => task.seeder === "true")
+    if (response.id === 'activeDownload' || response.id === 'activeDownloadFromPopup') {
+      let activeDownloadTasks = response.result.filter(task => task.seeder === 'false' || task.seeder === undefined)
+      let activeSeedingTasks = response.result.filter(task => task.seeder === 'true')
       activeDownloads = activeDownloadTasks.length
       activeSeeding = activeSeedingTasks.length
       updateBadge()
-      if (response.id === "activeDownloadFromPopup") chrome.runtime.sendMessage({ type: 'activeDownload', message: JSON.stringify(response.result) })
-    } else if (response.id === "activeWaitingFromPopup") {
+      if (response.id === 'activeDownloadFromPopup') chrome.runtime.sendMessage({ type: 'activeDownload', message: JSON.stringify(response.result) })
+    } else if (response.id === 'activeWaitingFromPopup') {
       chrome.runtime.sendMessage({ type: 'activeWaiting', message: JSON.stringify(response.result) })
-    } else if (response.id === "stoppedFromPopup") {
+    } else if (response.id === 'stoppedFromPopup') {
       chrome.runtime.sendMessage({ type: 'stopped', message: JSON.stringify(response.result) })
     } else {
       requestCounts()
@@ -97,25 +97,25 @@ const initializeWebSocket = async () => {
   }
 
   aria2.onclose = () => {
-    console.log("WebSocket connection closed")
+    console.log('WebSocket connection closed')
     chrome.action.setBadgeText({ text: '' })
   }
 
   aria2.onerror = (error) => {
-    console.error("WebSocket error:", error)
+    console.error('WebSocket error:', error)
     chrome.action.setBadgeText({ text: '' })
   }
 }
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-    if (key === "wsUrl" && oldValue !== newValue) {
-      console.log("WebSocket URL changed from", oldValue, "to", newValue)
+    if (key === 'wsUrl' && oldValue !== newValue) {
+      console.log('WebSocket URL changed from', oldValue, 'to', newValue)
       aria2.close()
       wsUrl = newValue
       initializeWebSocket()
-    } else if (key === "token" && oldValue !== newValue) {
-      console.log("Token changed from", oldValue, "to", newValue)
+    } else if (key === 'token' && oldValue !== newValue) {
+      console.log('Token changed from', oldValue, 'to', newValue)
       token = newValue
     }
   }
@@ -126,9 +126,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     requestCounts(true)
   } else if (request.type === 'removeTask') {
     aria2.send(JSON.stringify({
-      jsonrpc: "2.0",
-      method: "aria2.remove",
-      id: "removeTask",
+      jsonrpc: '2.0',
+      method: 'aria2.remove',
+      id: 'removeTask',
       params: [`token:${token}`, request.gid]
     }))
   }
@@ -146,3 +146,23 @@ const updateBadge = () => {
     chrome.action.setBadgeText({ text: '' })
   }
 }
+
+// add send to aria2 context menu
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'sendToAria2',
+    title: 'Send to Aria2',
+    contexts: ['link']
+  })
+})
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'sendToAria2') {
+    aria2.send(JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'aria2.addUri',
+      id: 'addUri',
+      params: [`token:${token}`, [info.linkUrl]]
+    }))
+  }
+})
