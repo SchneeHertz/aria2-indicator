@@ -5,7 +5,7 @@
 # Aria2 Indicator
 </div>
 
-**A minimalist Aria2 download status indicator (Chrome extension) that can only display or cancel the current task, without requiring any permissions, and has no other functions.**
+**A minimalist Aria2 download status indicator that displays or cancels current tasks, adds links as Aria2 download tasks without any permissions, and has no other features.**
 
 ## Installation
 
@@ -19,11 +19,12 @@
 
 ## Features
 
-- Display the number of tasks currently downloading or seeding on the icon
-- Show information about tasks currently downloading or seeding on the pop-up page
-- Cancel download task
+- Displays the number of currently downloading or seeding tasks on the icon
+- Shows information about currently downloading or seeding tasks in a popup page
+- Cancels download tasks
+- Adds an option to "Send to Aria2" in the right-click menu for links
 
-> This extension cannot add download tasks or intercept browser download tasks. You need to work with other tools that can add download tasks and run Aria2 on your computer in order to use it properly.
+> This extension cannot intercept browser download tasks. Additionally, you need to run Aria2 on your computer for it to work properly.
 
 ## Screenshot
 
