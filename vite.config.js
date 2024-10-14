@@ -1,6 +1,7 @@
 import { defineConfig, build } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import fs from 'fs/promises'
+import { resolve } from 'path'
 
 let bundling = false
 
@@ -28,4 +29,13 @@ export default defineConfig({
       }
     }
   ],
+  build: {
+    rollupOptions: {
+      input: {
+        'popup': 'popup.html',
+        'option': 'option.html',
+      },
+    },
+    outDir: 'dist',
+  },
 })
