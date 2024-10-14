@@ -7,7 +7,6 @@ const tokenInput = ref('')
 
 onMounted(() => {
   chrome.storage.local.get(['wsUrl', 'token'], function (data) {
-    console.log(data)
     if (data.wsUrl) {
       wsUrlInput.value = data.wsUrl
     } else {
@@ -21,7 +20,6 @@ onMounted(() => {
 
 const save = () => {
   const wsUrl = wsUrlInput.value
-  console.log('WebSocket URL:', wsUrl)
   if (wsUrl) {
     chrome.storage.local.set({ wsUrl: wsUrl }, function () {
       console.log('WebSocket URL saved:', wsUrl)
@@ -31,7 +29,6 @@ const save = () => {
     alert('Please enter a valid WebSocket URL')
   }
   const token = tokenInput.value
-  console.log('Token:', token)
   if (token) {
     chrome.storage.local.set({ token: token }, function () {
       console.log('Token saved:', token)
