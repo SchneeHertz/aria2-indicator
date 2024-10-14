@@ -1,7 +1,6 @@
 import { defineConfig, build } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import fs from 'fs/promises'
-import { resolve } from 'path'
 
 let bundling = false
 
